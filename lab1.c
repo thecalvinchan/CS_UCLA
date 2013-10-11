@@ -10,18 +10,31 @@ void mult ( int *x, int *y, int *z, int *o, int w ) ;
 void main() {
    int test = 1024; 
    int bit_length = 12;
-   int *bit, *err;
-   to_binary(test,bit_length,bit,err);
-   if (*err == 1) {
+   int bit[32];
+   int err;
+   to_binary(test,bit_length,bit,&err);
+   if (err == 1) {
         return;
     } 
    for (int i = 0; i < bit_length; i++) {
-    printf("%d",*(bit++));
+    printf("%d",bit[i]);
+   } 
+   printf("%c",'\n');
+   int test2 = -1024; 
+   int bit_length2 = 12;
+   int bit2[32];
+   int err2;
+   to_binary(test2,bit_length2,bit2,&err2);
+   if (err2 == 1) {
+        return;
+    } 
+   for (int i = 0; i < bit_length2; i++) {
+        printf("%d",bit2[i]);
    } 
     return;
 }
 
-void main_back()
+void back()
    {
    int a,b,c,d,w,n,o ;
    int x[32], y[32], z[32] ;
@@ -103,14 +116,16 @@ void adder( int *x, int *y, int *z, int *o, int w )
    /* w is an input = to the width in bits of x, y, z */
       int carry = 0;
       for (int i=0; i<w; i++) {
-         *(z+i) = (*x ^ *y) ^ carry;
-         if (*z == 0) {
+         z[i] = (x[i] ^ y[i]) ^ carry;
+         //printf("%d\n",z[i]);
+         if ((z[i] == 0) && (x[i] | y[i])) {
             carry = 1;
          } else {
             carry = 0;
          }
       }
-      if (carry) {
+      if (carry == 1) {
+         printf("Overflow");
          *o = 1;
       }
       return;
@@ -134,38 +149,41 @@ void to_binary( int n, int w, int *x, int *o )
    /*           x[0] is the least significant bit   */
    /*           x[w-1] is the most signifcant bit, for a signed number, it is the sign */
    /* o is an output = 1 if an overflow occurred ( n is too large for w bits ) */
+      int temp, neg;
       if (n>=0) {
-         int temp = n;
-         int neg = 0;
+         temp = n;
+         neg = 0;
+         x[w-1] = 0;
       } else {
-         int temp = -n;
-         int neg = 1;
+         temp = -n;
+         neg = 1;
+         x[w-1] = 1;
       }
       for (int i=0; i<w-1; i++) {
-         *(x+i) = neg ? ~(n % 2) : n % 2;
-         temp = n/2;
+         x[i] = neg ? !(temp % 2) : temp % 2;
+         //printf("%d\n",x[i]);
+         temp = temp/2;
       }
       if (temp != 0) {
-         *o = 1
+         *o = 1;
          return;
       } else if (neg) {
          //Kinda dangerous 1 level recursiveness, but whatever
          //It shouldn't infinite loop because 1 is not negative...
-         int *bit = malloc(sizeof(int)*w);
-         int *p;
-         to_binary(1,w,bit,p);
-         if (*p == 1) {
+         int bit[32];
+         to_binary(1,w,bit,o);
+         if (*o == 1) {
             //The program should never hit this block of code...
-            o = p;
             return;
          } else {
-            int *result = malloc(sizeof(int)*w);
-            adder(x,bit,result,p,w-1)
-            if (*p == 1) {
-               o = p;
-               return
+            int result[32];
+            adder(x,bit,result,o,w);
+            if (*o == 1) {
+               return;
             } else {
-               x = result;
+               for (int i=0;i<w;i++) {
+                  x[i] = result[i];
+               }
                x[w-1] = 1; 
                return;
             }
