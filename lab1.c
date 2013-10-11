@@ -8,8 +8,9 @@ void adder( int *x, int *y, int *z, int *o, int w ) ;
 void mult ( int *x, int *y, int *z, int *o, int w ) ;
 
 void test() {
-   int test = -128; 
-   int bit_length = 8;
+   // Compiler converts 2,147,483,648 to -2,147,483,648 
+   int test = -2147483648; 
+   int bit_length = 32;
    int bit[32];
    int err;
    to_binary(test,bit_length,bit,&err);
@@ -21,8 +22,8 @@ void test() {
     printf("%d",bit[i]);
    } 
    printf("%c",'\n');
-   int test2 = -128; 
-   int bit_length2 = 8;
+   int test2 = 128; 
+   int bit_length2 = 32;
    int bit2[32];
    int err2;
    to_binary(test2,bit_length2,bit2,&err2);
@@ -130,6 +131,7 @@ void adder( int *x, int *y, int *z, int *o, int w )
       int limit;
       if (x[w-1] == 0 &&  y[w-1] == 0) {
          limit = w - 1;
+         z[w-1] = 0;
       } else {
          limit = w;
       }
@@ -150,13 +152,16 @@ void adder( int *x, int *y, int *z, int *o, int w )
       // there exists a carry
       if (!(x[w-1]^y[w-1]) & carry) {
          if (x[w-1] == 0 && y[w-1] == 0) {
-             //printf("Overflow\n");
-             *o = 1;
-             return;
-         } else if (z[w-1] == 0) {
-             //printf(")verflow\n");
-            return;
+            // if both addends are positive and there is a carry
+            //printf("Overflow\n");
             *o = 1;
+            return;
+         } else if (z[w-1] == 0) {
+            // If both addends are negative and there is a carry
+            // And the most significant bit of the result is 0
+            //printf(")verflow\n");
+            *o = 1;
+            return;
          }
       } 
       // It is not possible for the addition 
@@ -236,7 +241,11 @@ void from_binary( int *x, int w, int *n )
    /*           x[w-1] is the most signifcant bit, for a signed number, it is the sign */
    /* w is an input = to the width in bits of x */
    /* n is an output and will be equal to the value stored in binary in x */
-
-
+      int decimal = 0;
+      for (int i=0; i<w-1; i++) {
+         decimal += x[i]*pow(2,i);
+      } 
+      decimal += x[w-1]*(-1)*pow(2,w-1);
+      *n = decimal;
    }
 
