@@ -7,34 +7,46 @@ void from_binary( int *x, int w, int *n ) ;
 void adder( int *x, int *y, int *z, int *o, int w ) ;
 void mult ( int *x, int *y, int *z, int *o, int w ) ;
 
-void main() {
-   int test = 1024; 
-   int bit_length = 12;
+void test() {
+   int test = -128; 
+   int bit_length = 8;
    int bit[32];
    int err;
    to_binary(test,bit_length,bit,&err);
-   if (err == 1) {
-        return;
-    } 
+   if (err) {
+      printf("Overflow in to_binary\n");
+      return;
+   }
    for (int i = 0; i < bit_length; i++) {
     printf("%d",bit[i]);
    } 
    printf("%c",'\n');
-   int test2 = -1024; 
-   int bit_length2 = 12;
+   int test2 = -128; 
+   int bit_length2 = 8;
    int bit2[32];
    int err2;
    to_binary(test2,bit_length2,bit2,&err2);
-   if (err2 == 1) {
-        return;
-    } 
+   if (err) {
+      printf("Overflow in to_binary\n");
+      return;
+   }
    for (int i = 0; i < bit_length2; i++) {
         printf("%d",bit2[i]);
    } 
-    return;
+   printf("%c",'\n');
+   int bit3[32];
+   adder(bit,bit2,bit3,&err2,bit_length2);
+   if (err2 == 1) {
+      printf("Overflow in adder\n");
+      return;
+   }
+   for (int i = 0; i < bit_length2; i++) {
+        printf("%d",bit3[i]);
+   } 
+   printf("%c",'\n');
 }
 
-void back()
+void main()
    {
    int a,b,c,d,w,n,o ;
    int x[32], y[32], z[32] ;
@@ -115,19 +127,42 @@ void adder( int *x, int *y, int *z, int *o, int w )
    /* o is an output = 1 if an overflow occurred */
    /* w is an input = to the width in bits of x, y, z */
       int carry = 0;
-      for (int i=0; i<w; i++) {
+      int limit;
+      if (x[w-1] == 0 &&  y[w-1] == 0) {
+         limit = w - 1;
+      } else {
+         limit = w;
+      }
+      for (int i=0; i<limit; i++) {
          z[i] = (x[i] ^ y[i]) ^ carry;
          //printf("%d\n",z[i]);
          if ((z[i] == 0) && (x[i] | y[i])) {
+            carry = 1;
+         } else if ((z[i] == 1) && (x[i] & y[i])) {
             carry = 1;
          } else {
             carry = 0;
          }
       }
-      if (carry == 1) {
-         printf("Overflow");
-         *o = 1;
-      }
+      // If both of the addends have the same 
+      // greatest significant bit (same sign)
+      // then it is possible to overflow if
+      // there exists a carry
+      if (!(x[w-1]^y[w-1]) & carry) {
+         if (x[w-1] == 0 && y[w-1] == 0) {
+             //printf("Overflow\n");
+             *o = 1;
+             return;
+         } else if (z[w-1] == 0) {
+             //printf(")verflow\n");
+            return;
+            *o = 1;
+         }
+      } 
+      // It is not possible for the addition 
+      // to overflow if there are two addends with
+      // differing greatest significant bits
+      *o = 0;
       return;
    }
 void mult ( int *x, int *y, int *z, int *o, int w )
@@ -151,20 +186,19 @@ void to_binary( int n, int w, int *x, int *o )
    /* o is an output = 1 if an overflow occurred ( n is too large for w bits ) */
       int temp, neg;
       if (n>=0) {
-         temp = n;
          neg = 0;
          x[w-1] = 0;
       } else {
-         temp = -n;
          neg = 1;
          x[w-1] = 1;
       }
+      temp = n;
       for (int i=0; i<w-1; i++) {
          x[i] = neg ? !(temp % 2) : temp % 2;
          //printf("%d\n",x[i]);
          temp = temp/2;
       }
-      if (temp != 0) {
+      if (temp != 0 && !neg) {
          *o = 1;
          return;
       } else if (neg) {
@@ -185,9 +219,13 @@ void to_binary( int n, int w, int *x, int *o )
                   x[i] = result[i];
                }
                x[w-1] = 1; 
+               *o = 0;
                return;
             }
          }   
+      } else {
+         *o = 0;
+         return;
       }
    }
 
