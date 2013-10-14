@@ -188,14 +188,6 @@ void mult ( int *x, int *y, int *z, int *o, int w )
             newy[r] = y[w-1];
          }
       }
-      for (int c=0; c<w*2;c++) {
-         printf("%d",newx[c]);
-      }
-         printf("\n");
-      for (int c=0; c<w*2;c++) {
-         printf("%d",newy[c]);
-      }
-         printf("\n");
       int msb = 0;
       int size = w*2;
       int *product;
@@ -219,10 +211,6 @@ void mult ( int *x, int *y, int *z, int *o, int w )
          for (int k=0; k<w*2; k++) {
             temp[k+i] = newx[k];
          }
-         for (int a=0; a<msb+w*2; a++) {
-            printf("%d",temp[a]);
-         }
-            printf("\n");
          int *cont = malloc(sizeof(int)*(size));
          adder(product,temp,cont,o,size);
          if (*o) {
@@ -245,11 +233,6 @@ void mult ( int *x, int *y, int *z, int *o, int w )
       int big, small;
       from_binary(product,w*2,&big);
       from_binary(product,w,&small);
-      for (int c=0; c<w*2;c++) {
-         printf("%d",product[c]);
-      }
-         printf("\n%d\n",big);
-         printf("%d\n",small);
       if (big != small) {
          *o = 1;
       } else {
@@ -258,57 +241,6 @@ void mult ( int *x, int *y, int *z, int *o, int w )
             z[n]=product[n];   
          }
       }
-      return;
-
-      int k = 0;
-      int *ret = malloc(sizeof(int)*w);
-      int res;
-      if (x[w-1] ^ y[w-1]) {
-         res = 1;
-      } else {
-         res = 0;
-      }
-      for (int j=0; j<w; j++) {
-         ret[j] = 0;
-      }
-      for (int i=0;i<w;i++) {
-         int l = k++;
-         if (y[i]==0) {
-            continue;
-         }
-         int *temp = malloc(sizeof(int)*w);
-         for (int j=0; j<w; j++) {
-            if (j<l) {
-               temp[j] = 0;
-            } else {
-               temp[j] = x[j-l];   
-            }
-            //printf("%d",temp[j]);
-         }
-            //printf("%c",'\n');
-         for (int m=w-l; m<w; m++) {
-            if (x[m] == 1) {
-                *o = 1;
-                return;
-            }
-         }
-         int *cont = malloc(sizeof(int)*w);
-         adder(ret,temp,cont,o,w);
-         if (*o) {
-           //printf("ADDER\n");
-           return;
-         } else {
-            int *del = ret;
-            ret = cont;
-            free(del);
-            free(temp);
-         }
-      }
-      for (int h=0; h<w; h++) {
-         z[h] = ret[h];
-         //printf("%d",ret[h]);
-      }
-      free(ret);
       return;
    }
 
