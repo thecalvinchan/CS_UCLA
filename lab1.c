@@ -1,5 +1,5 @@
 #include <stdio.h>
-
+#include <stdlib.h>
 #include <math.h>
 
 void to_binary  ( int  n, int w, int *x, int *o ) ;
@@ -177,10 +177,141 @@ void mult ( int *x, int *y, int *z, int *o, int w )
    /* z is an output array of w ints, either 0 or 1 representing the product of x and y */
    /* o is an output = 1 if an overflow occurred */
    /* w is an input = to the width in bits of x, y, z */
+      int *newx = malloc(sizeof(int)*w*2);
+      int *newy = malloc(sizeof(int)*w*2);
+      for (int r=0;r<w*2;r++) {
+         if (r<w) {
+            newx[r] = x[r];
+            newy[r] = y[r];
+         } else {
+            newx[r] = x[w-1];
+            newy[r] = y[w-1];
+         }
+      }
+      for (int c=0; c<w*2;c++) {
+         printf("%d",newx[c]);
+      }
+         printf("\n");
+      for (int c=0; c<w*2;c++) {
+         printf("%d",newy[c]);
+      }
+         printf("\n");
+      int msb = 0;
+      int size = w*2;
+      int *product;
+      for (int i=(w*2)-1;i>=0;i--) {
+         if (newy[i]==0) {
+            continue;
+         } else if (newy[i]==1 && msb < i) {
+            msb = i;      
+            size = (w*2)+msb;
+            product = malloc(sizeof(int)*(size));
+            to_binary(0,size,product,o);
+            if (*o) {
+               // Function shouldn't reach this...
+               return;
+            }
+         }
+         int *temp = malloc(sizeof(int)*(size));
+         for (int j=0; j<i; j++) {
+            temp[j] = 0;
+         }
+         for (int k=0; k<w*2; k++) {
+            temp[k+i] = newx[k];
+         }
+         for (int a=0; a<msb+w*2; a++) {
+            printf("%d",temp[a]);
+         }
+            printf("\n");
+         int *cont = malloc(sizeof(int)*(size));
+         adder(product,temp,cont,o,size);
+         if (*o) {
+            return;
+         } else {
+            for (int m=0; m<size; m++) {
+               product[m]=cont[m];
+            }
+            free(cont);
+            free(temp);
+         }
+      }
+      if ((size == w*2) && (newy[0] == 0)) {
+         product = malloc(sizeof(int)*(size));
+         to_binary(0,size,product,o);
+         if (*o) {
+            return;
+         }
+      }
+      int big, small;
+      from_binary(product,w*2,&big);
+      from_binary(product,w,&small);
+      for (int c=0; c<w*2;c++) {
+         printf("%d",product[c]);
+      }
+         printf("\n%d\n",big);
+         printf("%d\n",small);
+      if (big != small) {
+         *o = 1;
+      } else {
+         *o = 0;
+         for (int n=0; n<w; n++) {
+            z[n]=product[n];   
+         }
+      }
+      return;
 
-
-
+      int k = 0;
+      int *ret = malloc(sizeof(int)*w);
+      int res;
+      if (x[w-1] ^ y[w-1]) {
+         res = 1;
+      } else {
+         res = 0;
+      }
+      for (int j=0; j<w; j++) {
+         ret[j] = 0;
+      }
+      for (int i=0;i<w;i++) {
+         int l = k++;
+         if (y[i]==0) {
+            continue;
+         }
+         int *temp = malloc(sizeof(int)*w);
+         for (int j=0; j<w; j++) {
+            if (j<l) {
+               temp[j] = 0;
+            } else {
+               temp[j] = x[j-l];   
+            }
+            //printf("%d",temp[j]);
+         }
+            //printf("%c",'\n');
+         for (int m=w-l; m<w; m++) {
+            if (x[m] == 1) {
+                *o = 1;
+                return;
+            }
+         }
+         int *cont = malloc(sizeof(int)*w);
+         adder(ret,temp,cont,o,w);
+         if (*o) {
+           //printf("ADDER\n");
+           return;
+         } else {
+            int *del = ret;
+            ret = cont;
+            free(del);
+            free(temp);
+         }
+      }
+      for (int h=0; h<w; h++) {
+         z[h] = ret[h];
+         //printf("%d",ret[h]);
+      }
+      free(ret);
+      return;
    }
+
 void to_binary( int n, int w, int *x, int *o )
    {
    /* n is an input and is the number to be converted to binary */
@@ -209,21 +340,25 @@ void to_binary( int n, int w, int *x, int *o )
       } else if (neg) {
          //Kinda dangerous 1 level recursiveness, but whatever
          //It shouldn't infinite loop because 1 is not negative...
-         int bit[32];
+         //int bit[32];
+         int *bit = malloc(sizeof(int)*32);
          to_binary(1,w,bit,o);
          if (*o == 1) {
             //The program should never hit this block of code...
             return;
          } else {
-            int result[32];
+            //int result[32];
+            int *result = malloc(sizeof(int)*32);
             adder(x,bit,result,o,w);
             if (*o == 1) {
+               free(result);
                return;
             } else {
                for (int i=0;i<w;i++) {
                   x[i] = result[i];
                }
                x[w-1] = 1; 
+               free(result);
                *o = 0;
                return;
             }
