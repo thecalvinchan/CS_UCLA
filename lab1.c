@@ -7,59 +7,7 @@ void from_binary( int *x, int w, int *n ) ;
 void adder( int *x, int *y, int *z, int *o, int w ) ;
 void mult ( int *x, int *y, int *z, int *o, int w ) ;
 
-void main() {
-   // Compiler converts 2,147,483,648 to -2,147,483,648 
-   int test = 2147483647; 
-   int bit_length = 32;
-   int bit[32];
-   int err;
-   to_binary(test,bit_length,bit,&err);
-   if (err) {
-      printf("Overflow in to_binary\n");
-      return;
-   }
-   for (int i = 0; i < bit_length; i++) {
-    printf("%d",bit[i]);
-   } 
-   printf("%c",'\n');
-   int value1;
-   from_binary(bit,bit_length,&value1);
-   printf("%d\n",value1);
-   int test2 = -1; 
-   int bit_length2 = bit_length;
-   int bit2[32];
-   int err2;
-   to_binary(test2,bit_length2,bit2,&err2);
-   if (err) {
-      printf("Overflow in to_binary\n");
-      return;
-   }
-   int value2;
-   from_binary(bit2,bit_length2,&value2);
-   printf("%d\n",value2);
-   int bit3[32];
-   int multval[32];
-   adder(bit,bit2,bit3,&err2,bit_length2);
-   if (err2 == 1) {
-      printf("Overflow in adder\n");
-      //return;
-   }
-   int value3;
-   from_binary(bit3,bit_length2,&value3);
-   printf("%d",value3);
-   printf("%c",'\n');
-   mult(bit,bit2,multval,&err2,bit_length2);
-   if (err2 == 1) {
-      printf("Overflow in mult\n");
-      //return;
-   }
-   int value4;
-   from_binary(multval,bit_length2,&value4);
-   printf("%d",value4);
-   printf("%c",'\n');
-}
-
-void test()
+void main()
    {
    int a,b,c,d,w,n,o ;
    int x[32], y[32], z[32] ;
@@ -149,7 +97,6 @@ void adder( int *x, int *y, int *z, int *o, int w )
       }
       for (int i=0; i<limit; i++) {
          z[i] = (x[i] ^ y[i]) ^ carry;
-         //printf("%d\n",z[i]);
          if ((z[i] == 0) && (x[i] | y[i])) {
             carry = 1;
          } else if ((z[i] == 1) && (x[i] & y[i])) {
@@ -165,13 +112,11 @@ void adder( int *x, int *y, int *z, int *o, int w )
       if (!(x[w-1]^y[w-1]) & carry) {
          if (x[w-1] == 0 && y[w-1] == 0) {
             // if both addends are positive and there is a carry
-            //printf("Overflow\n");
             *o = 1;
             return;
          } else if (z[w-1] == 0) {
             // If both addends are negative and there is a carry
             // And the most significant bit of the result is 0
-            //printf(")verflow\n");
             *o = 1;
             return;
          }
@@ -182,6 +127,7 @@ void adder( int *x, int *y, int *z, int *o, int w )
       *o = 0;
       return;
    }
+
 void mult ( int *x, int *y, int *z, int *o, int w )
    {
    /* x is an input array of w ints, either 0 or 1 representing the first multiplicand */
@@ -223,16 +169,6 @@ void mult ( int *x, int *y, int *z, int *o, int w )
          for (int k=0; k<w*2; k++) {
             temp[k+i] = newx[k];
          }
-         /**printf("\ntemp\n");
-         for (int c=0;c<w*2;c++) {
-            printf("%d",temp[c]);
-         }
-         printf("\n");
-         printf("product\n");
-         for (int c=0;c<w*2;c++) {
-            printf("%d",product[c]);
-         }
-         printf("\n");**/
          int *cont = malloc(sizeof(int)*(size));
          adder(product,temp,cont,o,size);
          if (*o) {
@@ -252,36 +188,17 @@ void mult ( int *x, int *y, int *z, int *o, int w )
             return;
          }
       }
-      int big, small;
-      /**printf("product\n");
-      for (int c=0;c<w;c++) {
-         printf("%d",product[c]);
-      }
-      printf("\n");
-      from_binary(product,w*2,&big);
-      printf("%d\n",big);
-      from_binary(product,w,&small);
-      printf("%d\n",small);**/
       for (int c=w;c<w*2;c++) {
          if (product[c] != product[w-1]) {
             *o = 1;
             return;
          }
       }
-       
       *o = 0;
       for (int n=0; n<w; n++) {
          z[n]=product[n];   
       }
-
-      /**if (big != small) {
-         *o = 1;
-      } else {
-         *o = 0;
-         for (int n=0; n<w; n++) {
-            z[n]=product[n];   
-         }
-      } **/
+      free(product);
       free(newx);
       free(newy);
       return;
@@ -306,7 +223,6 @@ void to_binary( int n, int w, int *x, int *o )
       temp = n;
       for (int i=0; i<w-1; i++) {
          x[i] = neg ? !(temp % 2) : temp % 2;
-         //printf("%d\n",x[i]);
          temp = temp/2;
       }
       if (temp != 0 && !neg) {
