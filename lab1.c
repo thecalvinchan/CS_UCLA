@@ -102,7 +102,7 @@ void main()
 
    for( w=8; w<13; w=w+4 )          /* word sizes 8 and 12 bits */
       for( a=99; a >-100; a=a-99 )  /* 99, 0, -99 */
-         for( b=4; b>-5; b=b-4 )    /* 4, 0, -4 */ 
+         for( b=4; b>-5; b=b-4 )    /* 4, 0, -4 */
             {
             to_binary( a,w,x,&o ) ;
             if ( o )
