@@ -1,29 +1,25 @@
-int beg = 0;
-char *min_ptr = &beg;
-char *max_ptr = &beg;
+#include <stdio.h>
+
+void dumper( unsigned char *x, int n, int sgn ) ;
+int endian();
+
+char *min_ptr = NULL;
+char *max_ptr = NULL;
 
 void spray_paint( char *x, int sz, char tok, char *t ) 
 {
-/* **** your new code ****/
     int i = 0;
-    if (*min_ptr == 0 && *max_ptr == 0) {
+    if (min_ptr == NULL && max_ptr == NULL) {
         min_ptr = x;
-        //printf("min_pr %p\n",min_ptr);
         max_ptr = x;
-        //printf("max_pr %p\n",max_ptr);
     }
     for (i=0;i<sz;i++) {
-        //printf("size %d ",sz);
-        //printf("%c \n",*(x+i));
-        //printf("current ptr %p\n",x+i);
         *(x+i) = tok;
         if (min_ptr > (x+i*sizeof(char))) {
             min_ptr = x+i;
-            //printf("min_pr %p\n",min_ptr);
         } 
         if (max_ptr < (x+i*sizeof(char))) {
             max_ptr = x+i;
-            //printf("max_pr %p\n",max_ptr);
         }
     }
 }
@@ -101,32 +97,25 @@ int i ;
 char* a ;
 char x[20] ;
 
-printf("%p\n",&i);
-printf("%p\n",&a);
-printf("%p\n",&x);
 spray_paint( (char *) &i, sizeof(i), 0xf1, "sub2.i" ) ;
 spray_paint( (char *) &a, sizeof(a), 0xf2, "sub2.a" ) ;
 spray_paint( (char *) &x, sizeof(x), 0xf3, "sub2.x" ) ;
-printf("%p\n",min_ptr);
-printf("%p\n",max_ptr);
 int temp = max_ptr-min_ptr;
-printf("%d\n",temp);
-dumper(min_ptr-16,temp/16+3,1);
 /* dumper(...) *** insert your code here to get the right answer*****/
+dumper(min_ptr-16,temp/16+3,1);
 }
+
 void sub1()
 {
 float i ;
 short a ;
 int x[20] ;
-printf("%p\n",&i);
-printf("%p\n",&a);
-printf("%p\n",&x);
 spray_paint( (char *) &i, sizeof(i), 0xe1, "sub1.i" ) ;
 spray_paint( (char *) &a, sizeof(a), 0xe2, "sub1.a" ) ;
 spray_paint( (char *) &x, sizeof(x), 0xe3, "sub1.x" ) ;
 sub2() ;
 }
+
 int main()
 {
 struct mine {
@@ -142,11 +131,6 @@ int s ;
 } a ;
 
 char x[50] ;
-printf("%d\n",sizeof(i));
-
-printf("%p\n",&i);
-printf("%p\n",&a);
-printf("%p\n",&x);
 spray_paint( (char *) &i, sizeof(i), 0xd1, "main.i" ) ;
 spray_paint( (char *) &a, sizeof(a), 0xd2, "main.a" ) ;
 spray_paint( (char *) &x, sizeof(x), 0xd3, "main.x" ) ;
