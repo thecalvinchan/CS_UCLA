@@ -103,32 +103,48 @@ void readwritecache( int readwrite, int a, int *value, int *hitmiss, int voice )
    unsigned int ta = a >> (s+b);
    unsigned int bo = (a << (extra+T+s));
        bo = bo >> (extra+T+s);
+   if (voice)
+      printf("Requested %d operation on a: %d, si: %d, tag: %d, bo: %d\n",readwrite,a,si,ta,bo);
    if (cache[si].valid && cache[si].tag == ta) {
+      if (voice)
+         printf("Requested set with matching tag exists in cache.\n");
       if (readwrite == WRITE) {
-         cache[si].block[b] = *value;
+         if (voice)
+            printf("Writing value %d to cache at block %d for mem location %d.\n", *value, bo, a);
+         cache[si].block[bo] = *value;
          cache[si].dirty = 1;
          *hitmiss = 1;
       } else {
-         *value = cache[si].block[b];
+         *value = cache[si].block[bo];
+         if (voice)
+            printf("Reading value %d from cache at block %d for mem location %d.\n", *value, bo, a);
          *hitmiss = 1;
       }
    } else {
+      int i;
       if (cache[si].dirty) {
-         int *address = cache[si].block + b;
-         memory[a] = *address;
-         //wtf does count dirty write mean?
+         int address = (cache[si].tag << (m-T)) + (si << (m-T-s));
+         if (voice)
+            printf("Dirty bit exists. Loading values from cache into memory at index %d.\n",address);
+         //printf("Address %d\n",address);
+         for (i=0;i<B;i++) {
+            memory[address+i] = cache[si].block[i];
+            //printf("Dirty bit exists. Loading value %d from cache set %d into mem location %d.\n",cache[si].block[i],si,address+i);
+         }
          dwrit++;
          cache[si].dirty = 0;
       }
       cache[si].valid = 1;
       cache[si].tag = ta;
-      cache[si].block[b] = memory[a];
+      for (i=0;i<B;i++) {
+         cache[si].block[i] = memory[a-bo+i];
+      }
       if (readwrite == READ) {
          cache[si].dirty = 0;
-         *value = cache[si].block[b];
+         *value = cache[si].block[bo];
          *hitmiss = 0;
       } else {
-         cache[si].block[b] = *value;
+         cache[si].block[bo] = *value;
          cache[si].dirty = 1;
          *hitmiss = 0;
       }
@@ -179,6 +195,7 @@ void locationexample()
    int i,j,k,z ;
 
    for( y=508; y< 528; y=y+1 )
+   //for( y=508; y< 509; y=y+1 )
       {
       for( i=0; i<ni; i++ )
          {
@@ -193,18 +210,139 @@ void locationexample()
 // add your transposition code here for row wise and column wise with calls to stats for each
 //
       }
-printf( "---------------------------------\n" ) ;		
-
+   printf( "---------------------------------\n" ) ;		
    }
+
+void rowtrans()
+   {
+   int i,j,k,z ;
+
+   for( y=508; y< 528; y=y+1 )
+   //for( y=508; y< 509; y=y+1 )
+      {
+//
+// these two statements implement x[i] = y[i] ; x starts at location 0, y starts as indicated.
+//
+      for (i=0; i<ni; i++) {
+         for (j=0; j<nj; j++) {
+            readwritecache(READ, y+(i*nj)+j, &z, &k, 0);
+            readwritecache(WRITE, x+(j*ni)+i, &z, &k, 0);
+         }
+      }
+      stats( "Row-wise transpose" );
+      }
+   printf( "---------------------------------\n" ) ;		
+   }
+
+void coltrans()
+   {
+   int i,j,k,z ;
+
+   for( y=508; y< 528; y=y+1 )
+   //for( y=508; y< 509; y=y+1 )
+      {
+      for (j=0; j<nj; j++) {
+         for (i=0; i<ni; i++) {
+            readwritecache(READ, y+(i*nj)+j, &z, &k, 0);
+            readwritecache(WRITE, x+(j*ni)+i, &z, &k, 0);
+         }
+      }
+      stats( "Col-wise transpose" );
+      }
+   printf( "---------------------------------\n" ) ;		
+   }
+
 //
 // add your working set test functions here
 //
+
+void workingset2a()
+   {
+   int i,j,k,z;
+   y = 20000;
+   for (ni=88;ni<=120;ni+=8) {
+      nj = ni;
+      for (i=0; i<ni; i++) {
+         for (j=0; j<nj; j++) {
+            readwritecache(READ, y+(i*nj)+j, &z, &k, 0);
+            readwritecache(WRITE, x+(j*ni)+i, &z, &k, 0);
+         }
+      }
+      stats( "Working Set 2a" );
+      }
+   printf( "---------------------------------\n" ) ;		
+   }
+
+void workingset2b()
+   {
+   int ii,jj,i,j,k,z;
+   y = 20000;
+   for (ni=88;ni<=120;ni+=8) {
+      nj = ni;
+      for (ii=0; ii<ni; ii+=8) { 
+         for (jj=0; jj<nj; jj+=8) {
+            for (i=ii; i<ii+8; i++) {
+               for (j=jj; j<jj+8; j++) {
+                  readwritecache(READ, y+(i*nj)+j, &z, &k, 0);
+                  readwritecache(WRITE, x+(j*ni)+i, &z, &k, 0);
+               }
+            }
+         }
+      }
+      stats( "Working Set 2b : 8x8 blocking" );
+      }
+   printf( "---------------------------------\n" ) ;		
+   }
+
+void workingset3a()
+   {
+   int i,j,k,z;
+   y = 20000;
+   for (ni=88;ni<=120;ni+=8) {
+      nj = ni;
+      for (j=0; j<nj; j++) {
+         for (i=0; i<ni; i++) {
+            readwritecache(READ, y+(i*nj)+j, &z, &k, 0);
+            readwritecache(WRITE, x+(j*ni)+i, &z, &k, 0);
+         }
+      }
+      stats( "Working Set 3a" );
+      }
+   printf( "---------------------------------\n" ) ;		
+   }
+
+void workingset3b()
+   {
+   int ii,jj,i,j,k,z;
+   y = 20000;
+   for (ni=88;ni<=120;ni+=8) {
+      nj = ni;
+      for (jj=0; jj<nj; jj+=8) {
+         for (ii=0; ii<ni; ii+=8) { 
+            for (j=jj; j<jj+8; j++) {
+               for (i=ii; i<ii+8; i++) {
+                  readwritecache(READ, y+(i*nj)+j, &z, &k, 0);
+                  readwritecache(WRITE, x+(j*ni)+i, &z, &k, 0);
+               }
+            }
+         }
+      }
+      stats( "Working Set 3b : 8x8 blocking" );
+      }
+   printf( "---------------------------------\n" ) ;		
+   }
 
 int main()
    {
 
    initcache() ;
    locationexample() ;
+   rowtrans();
+   coltrans();
+   workingset2a();
+   workingset2b();
+   workingset3a();
+   workingset3b();
 // 
 // add calls to your working set test functions here
 //
