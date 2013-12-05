@@ -134,7 +134,52 @@ int lalloc( int amt )
 
 void lfree( int *aa ) 
    {
-   //  free code goes here
+      int head = *aa;
+      int payload = hdr_payload(head);
+      int footer = head + sizehdr + payload;
+      hdr_freeall(head) = 0;
+      hdr_freeall(footer) = 0;    
+
+      int prev = head - sizehdr;
+      int next = footer + sizehdr;
+      int existsFree = 0;
+
+      // Free block adjacent to the left
+      if (hdr_freeall(prev) == 0) {
+         //merge left
+         head = head - hdr_payload(prev) - 2*sizehdr;
+         hdr_payload(head) += 2*sizehdr + payload;
+         hdr_payload(footer) = hdr_payload(head);
+         existsFree = 1;
+      }
+      if (hdr_freeall(next) == 0) {
+         int tail = next + hdr_payload(next) + sizehdr;
+         hdr_payload(head) += 2*sizehdr + hdr_payload(next);
+         hdr_payload(tail) = hdr_payload(head);
+
+         prev = head - sizehdr;
+         int previus = hdr_previus(next);
+         int succesr = hdr_succesr(next);
+         if (existsFree) {
+            // If already merged left
+            // Removes right block from Free List
+            hdr_succesr(previus) = succesr;
+            hdr_previus(succesr) = previus;
+         } else {
+            // Else haven't merged left
+            // Expands left block to include newly freed space
+            hdr_succesr(previus) = head;            
+            hdr_succesr(head) = succesr;
+            hdr_previus(succesr) = head;
+            existsFree = 1;
+         }
+      }
+      // No adjacent free blocks
+      if (existsFree == 0) {
+         hdr_succesr(head) = anchor.succesr;
+         anchor.succesr = head;   
+         hdr_previus(head) = -1;
+      }
    }
 
 int main()
