@@ -34,42 +34,28 @@ let rec computed_periodic_point = fun eq f p x->
 
 type ('terminal,'nonterminal) symbol = T of 'terminal | N of 'nonterminal;;
 
-let equal_rules (r1,a) (r2,b) = equal_sets a b;;
- 
-let terminates = fun x nt-> 
-    match x with 
-        | T x->true
-        | N x->contains x nt
-;;
- 
-let rec validate = fun rhs nt->
-    match rhs with
-        | []-> true
-        | h::t->if terminates h nt then validate t nt
-            else false
-;;
- 
-let rec find_term_nonterms = fun g nt->
+let rec contain_tuple = fun a b ->
+    match b with
+        | []->false
+        | (rs,ls)::t -> if a = rs then true else contain_tuple a t;;
+
+let rec filter_grammar = fun g ts->
+    let check_ter = fun sym next->
+        match sym with
+            | T sym->true
+            | N sym->contains sym ts || contain_tuple sym (filter_grammar next ts)
+    in
+    let rec filter_rules = fun r ng->
+        match r with
+            | []->true
+            | h::t->if check_ter h ng then filter_rules t ng
+                else false
+    in
     match g with
-        | [] -> nt
-        | (lhs,rhs)::t ->
-            if validate rhs nt && not (contains lhs nt) 
-            then find_term_nonterms t (lhs::nt)
-            else find_term_nonterms t nt
-;;
+        | []->g
+        | (ls,rs)::tail->if filter_rules rs tail then (ls,rs)::(filter_grammar tail (ls::ts))
+            else filter_grammar tail ts;;
  
-let filter (g,nt) = (g, find_term_nonterms g nt);;
- 
-let rec order = fun g nt->
-    match g with 
-        | [] -> []
-        | (lhs,rhs)::t ->
-            if validate rhs nt then (lhs,rhs)::(order t nt)
-            else order t nt
-;;
- 
-let filter_blind_alleys = fun g->
+let rec filter_blind_alleys = fun g->
     match g with
-        | (a,b) -> 
-            (a, order b (snd (computed_fixed_point (equal_rules) (filter) (b,[]))))
-;;
+        | (ls,rs)->(ls, filter_grammar rs []);;
