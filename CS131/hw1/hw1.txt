@@ -1,0 +1,15 @@
+I implemented filter_blind_alleys in a recursive fashion. It first matches the
+argument with a tuple, and calls filter_grammar on the second member of the
+tuple. This runs through each rule and checks if it is terminal or non terminal.
+Every time a terminal rule is found, it is added to a list. If any part of the
+rule is non terminal, it will check the list to see if that rule can be resolved
+to a terminal rule, and if not, then it will recursively check the next line to 
+see if the grammar can be resolved to a terminal rule. All non-terminal rules
+are removed from the list returned by filter_grammar, which becomes the second
+member of the tuple returned by filter_blind_alleys.
+
+This method may be a bit inefficient because every time a non-terminal rule is
+reached, it will recursively call filter_grammar on the list with the current
+rule removed. However, since we are keeping track of all terminal rules already
+encountered, then that itself alleviates the efficiency issue. However, this
+does take up additional space that otherwise might not be needed.
