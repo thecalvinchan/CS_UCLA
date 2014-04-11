@@ -9,17 +9,17 @@ let rec subset = fun a b ->
         | h::t->if contains h b then subset t b else false;;
 
 let proper_subset = fun a b ->
-    if subset a b AND length a < length b then true else false;;
+    (subset a b) && not (subset b a);;
 
 let equal_sets = fun a b ->
     subset a b && subset b a;;
 
-let rec set_diff = fun a b c->
+let rec set_diff = fun a b->
     match a with
-        | []->c
+        | []->[]
         | h::t->if contains h b 
-            then set_diff t b c
-            else set_diff t b (h::c);;
+            then set_diff t b
+            else h::(set_diff t b);;
 
 let rec computed_fixed_point = fun eq f x->
     if eq (f x) x then x
@@ -32,22 +32,44 @@ let rec computed_periodic_point = fun eq f p x->
     if eq (compute_rec_func f p x) x then x
     else computed_periodic_point eq f p (f x);;
 
-let rec filter_blind_alleys = fun g->
+type ('terminal,'nonterminal) symbol = T of 'terminal | N of 'nonterminal;;
 
-    let check_term = fun sym r->
-        match sym with
-            | T->true
-            | N->if contains (sym,'a list) (filter_blind_alleys r) then true
-                else false;; in
-
-        let rec check_rhs_term = fun rhs q->
-            match rhs with
-                | []->true
-                | h::t-> if check_term h q then check_rhs_term t g
-                    else false;; in
-
+let equal_rules (r1,a) (r2,b) = equal_sets a b;;
+ 
+let terminates = fun x nt-> 
+    match x with 
+        | T x->true
+        | N x->contains x nt
+;;
+ 
+let rec validate = fun rhs nt->
+    match rhs with
+        | []-> true
+        | h::t->if terminates h nt then validate t nt
+            else false
+;;
+ 
+let rec find_term_nonterms = fun g nt->
     match g with
-        | []->g
-        | (lhs,rhs)::t-> if check_rhs_term rhs q then (lhs,rhs)::(filter_blind_alleys t)
-            else (filter_blind_alleys t);;
-
+        | [] -> nt
+        | (lhs,rhs)::t ->
+            if validate rhs nt && not (contains lhs nt) 
+            then find_term_nonterms t (lhs::nt)
+            else find_term_nonterms t nt
+;;
+ 
+let filter (g,nt) = (g, find_term_nonterms g nt);;
+ 
+let rec order = fun g nt->
+    match g with 
+        | [] -> []
+        | (lhs,rhs)::t ->
+            if validate rhs nt then (lhs,rhs)::(order t nt)
+            else order t nt
+;;
+ 
+let filter_blind_alleys = fun g->
+    match g with
+        | (a,b) -> 
+            (a, order b (snd (computed_fixed_point (equal_rules) (filter) (b,[]))))
+;;
