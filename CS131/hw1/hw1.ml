@@ -37,7 +37,7 @@ let rec filter_blind_alleys = fun g->
     let check_term = fun sym r->
         match sym with
             | T->true
-            | N->if contains (sym,_) (filter_blind_alleys r) then true
+            | N->if contains (sym,'a list) (filter_blind_alleys r) then true
                 else false;; in
 
         let rec check_rhs_term = fun rhs q->
