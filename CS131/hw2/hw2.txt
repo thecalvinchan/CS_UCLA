@@ -1,0 +1,22 @@
+I implemented parse_prefix in a hierarchical manner. parse_prefix itself is a
+currying function that returns a function that takes two arguments, acceptor and
+frag. These are passed into gen_rhs, which extracts the right hand rules from
+the production function of gram. These rules are passed into another function,
+check_rs, that goes through each rule and calls match_right, which checks to see
+if there is any prefix that matches a right hand rule. match_right does single 
+symbol matching, and if a single terminal symbol matches that in a rule, then it
+moves onto the next symbol.
+
+If at anytime match_right runs into a non-terminal symbol, then it recursively
+calls the top level function, gen_rhs, which will progress down the right hand
+rules to see if the fragment can be resolved. If not, then it is a blind alley
+and None is returned. If at the end of the entire matching, the entire right
+hand rule is matched by the fragment, then gen_rhs will return Some (p, f) which
+is passed back to the curried function of parse_prefix.
+
+I considered using fewer functions to perform the matching. However, it
+complicated a bit of the logic when it came to resolving non-terminal symbols.
+As such, I decided to proceed with the same method I used for homework 1, and
+implemented various recursive functions within each other so that they could
+call a parent function at any time if need be. It seems to be working well and
+passing the test cases that I use.
