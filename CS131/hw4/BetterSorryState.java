@@ -1,24 +1,53 @@
 import java.util.concurrent.atomic.AtomicIntegerArray;
 
-class BetterSafeState implements State {
-    private AtomicIntegerArray value;
+class KindaAtomicIntegerArray extends AtomicIntegerArray {
+    public KindaAtomicIntegerArray(int i) {
+        super(i);
+    }
+    public KindaAtomicIntegerArray(int[] i) {
+        super(i);
+    }
+    public int decrementAndGetRekt(int i) {
+        int j=0;
+        while (j++ < 2) {
+            int current = get(i);
+            int next = current - 1;
+            if (compareAndSet(i, current, next))
+                return next;
+        }
+        return getAndAdd(i,-1) - 1;
+    }
+    public int incrementAndGetRekt(int i) {
+        int j=0;
+        while (j++ < 2) {
+            int current = get(i);
+            int next = current + 1;
+            if (compareAndSet(i, current, next))
+                return next;
+        }
+        return getAndAdd(i,1) + 1;
+    }
+}
+
+class BetterSorryState implements State {
+    private KindaAtomicIntegerArray value;
     private byte maxval;
 
-    BetterSafeState(byte[] v) { 
+    BetterSorryState(byte[] v) { 
         int temp[] = new int[v.length]; 
         for (int i=0;i<v.length;i++) {
             temp[i] = v[i];    
         }
-        value = new AtomicIntegerArray(temp); 
+        value = new KindaAtomicIntegerArray(temp); 
         maxval = 127; 
     }
 
-    BetterSafeState(byte[] v, byte m) { 
+    BetterSorryState(byte[] v, byte m) { 
         int temp[] = new int[v.length]; 
         for (int i=0;i<v.length;i++) {
             temp[i] = v[i];    
         }
-        value = new AtomicIntegerArray(temp); 
+        value = new KindaAtomicIntegerArray(temp); 
         maxval = m; 
     }
 
@@ -36,8 +65,8 @@ class BetterSafeState implements State {
         if (value.get(i) <= 0 || value.get(j) >= maxval) {
             return false;
         }
-        value.decrementAndGet(i);
-        value.incrementAndGet(j);
+        value.decrementAndGetRekt(i);
+        value.incrementAndGetRekt(j);
         return true;
     }
 }
