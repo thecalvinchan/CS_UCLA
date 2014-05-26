@@ -1,0 +1,10 @@
+The solution takes the provided solution to the old homework assignment
+and changes the implementation slightly. It uses continuations instead
+of acceptor functions. In the original implementation, acceptor 
+functions were passed in via input. In my implementation, I defined a 
+custom acceptor function that calls the continuation on fragment if
+successful.
+
+By adding this acceptor, I defined a new make-matcher function
+that uses the existing make-matcher function to determine whether or not
+to call the redefined acceptor as a continuation.
