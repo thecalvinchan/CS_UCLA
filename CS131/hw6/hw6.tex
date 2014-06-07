@@ -1,0 +1,57 @@
+\documentclass[letterpaper,twocolumn,10pt]{article}
+\usepackage{epsfig}
+\usepackage{graphicx}
+\begin{document}
+
+\date{}
+
+\title{\Large \bf Containerization Support Languages}
+
+\author{
+{\rm Calvin Chan} \\
+University of California, Los Angeles
+}
+
+\maketitle
+
+\begin{abstract}
+The purpose of this paper is to research various implementations of operating system-level virtualization with Linux Containers. We want to identify the benefits and drawbacks of using Docker, a lightweight virtualized environment for portable applications (written in Go). We want to compare Docker's Go implementation with three different languages (Java, Python, Hack) and deterine the best language to build a container framework alternative that is similar to Docker.
+\end{abstract}
+
+\section{Introduction}
+As a follow up to the application server herd project of UCLA CS 131 Spring 2014, we want to research deploying the proxy herd on a large set of virtual machines. We want to manage our deployment using Docker. As a backup, we want to consider a separate implementation of Docker in case of problems with the original Go implementation. Docker includes features to run self-contained packages, allowing for deployment on different machines without the need to reconfigure and reinstall. Given the purpose of our original application (the distributed application server herd) these deployments require constant communication with a core database, while maintaing concurrent active connections with multiple clients.
+
+\section{Docker and Go}
+Docker is an easy, lightweight virtualized environment for portable applications. Docker allows developers to wrap their applications in a virtual container that resolves all dependencies, regardless of platform or hardware. Basically, the Docker Engine sits atop the operating system and resolves binary and library dependencies for each program container. Docker is built on the Go language, which offers very fast compilation (to machine code). Go supports concurrency at the language level and provides an extensive garbage collection feature. However, Go is still an experimental language and is subject to change. In addition, its library coverage is still limited.
+
+\section{Python}
+Python is a multi-paradigm language, which supports object-oriented principles, as well as functional paradigms. All data in a Python program is represented by objects, allowing the passing of function without arguments to other functions; there are classes, though statements are allowed outside them, unlike Java. Python supports recursion and anonymous functions, though side effects can be implemented. Python is a strong, dynamically typed language. There are many built-in types, from numeric to iterator and mapping. Syntactically, it uses indentation to delimit blocks. Python uses reference counting to manage memory; if an object is dereferenced, its object count is set to 0 and its marked eligible for garbage collection. Python deals with exceptions using the try clause; it also allows users to raise an exception. Two unique features are its dynamic typing, enabling variable to be successively assignment to two different types, and mutability vs. immutability of its sequence types.
+
+\section{Java}
+Java is an object-oriented language that is known in the industry to be well documented and platform independent. Derived from the C language, Java is a fully compiled language that is statically typed. The Java language has been used by many enterprise environments and has been used since the early 90’s. The HotSpot VM has been heavily optimized and is one of the fastest VM’s in the world.
+
+\section{Hack}
+Hack was recently released by Facebook as an extension of the PHP language. Facebook wanted better performance on PHP engine and decided to add a Haskell-like type system to make the language run faster. The VM was rewritten to allow for just-in-time compilation, meaning that only code that will be used will be compiled. The language is completely backwards compatible with native PHP code.
+
+\section{Comparison}
+\begin{itemize}
+\item
+Python and PHP are both dynamically typed (loosely typed) language. However, Hack adds the capability to create variables that are strongly typed. Java is a completely statically typed language (strongly typed).
+\item
+Java is a fully compiled language. Hack is a dynamically interpreted language that uses just-in-time compilation. Python is an "interpreted" language. Python code is compiled into byte code and each line of byte code is dynamically interpreted.
+\item
+All three (Python, Java, and Hack) offer object-oriented design patterns and programming capabilities. Traditional object-oriented design is prominent in all three languages. 
+\end{itemize}
+
+\section{Evaluation}
+An alternative implementation of Docker's virtualized container application is best written in Java. The requirements to consider are as followed: ease of use, flexibility, generality, performance, and reliability. Upon considering the main reason for devising an alternative to docker (in case the Go implementation fails and breaks down), it's easy to spot the key features that are the most important to consider: ease of use, performance, and reliability.  As reliability and
+performance is concerned, Java is the best out of all the languages here because it has a large developer support community and has extensive history. This ensures that the Java language itself has close to no shortcomings and coverage when it comes down to programming bugs and quirks. Although Python and Hack both provide unique, exciting features, they do not provide a substantial safety net to an alternative implementation of Docker.
+
+\section{References}
+[1]https://www.docker.io/
+[2]http://docs.oracle.com/javase/7/docs/
+[3]https://www.python.org/
+[4]http://hacklang.org/
+[5]http://stackoverflow.com/questions/2198529/what-are-the-advantages-and-disadvantages-of-go-programming-language
+
+\end{document}

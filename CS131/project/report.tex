@@ -1,0 +1,71 @@
+\documentclass[letterpaper,twocolumn,10pt]{article}
+\usepackage{epsfig}
+\usepackage{graphicx}
+\begin{document}
+
+\date{}
+
+\title{\Large \bf Application Server Herd Implementation Using Twisted}
+
+\author{
+{\rm Calvin Chan} \\
+University of California, Los Angeles
+}
+
+\maketitle
+
+\begin{abstract}
+
+The aim of this paper is to evaluate the pros and cons of using various frameworks written in different languages to build a web application that has many simultaneous interacting users that need lots of updates. The main framework we are investigating is Twisted, a Python based event-driven framework. We are focusing on an application server-herd that will allow for frequent updates from various protocols and multiple mobile clients. The paper focuses on the language features and the ease with which the application can be written in the respective language.
+\end{abstract}
+
+\section{Introduction}
+Though LAMP (Linux, Apache, MySQL, PHP) platforms use multiple redundant web servers behind load-balancing virtual routers to provide reliability and performance, it is a bottleneck to applications that need to scale to support frequent pings from multiple mobile clients. This paper evaluates the Twisted framework's ability to implement a specific server herd, allowing for multiple application servers to communicate directly with each other, while sharing a common core database and caches. We want to see how easy it is to write applications using Twisted, how maintanable and reliable those applications will be, and how extensible these applications written in Twisted are.
+
+\section{Twisted Framework}
+Twisted has extensive protocol support; includes lots and lots of protocol implementations, meaning that there will most likely be an API available to talk to a remote system (either client or server in most cases). As an event-driven framework for python, Twisted allows python applications to be written to listen for input before performing actions, introducing a new level of asynchronous programming to traditional Python programming. However, callbacks and anonymous functions feel a bit forced and different when added into the blocking style of Python programming. 
+
+\section{Python}
+Python is a multi-paradigm language, which supports object-oriented principles, as well as functional paradigms. All data in a Python program is represented by objects, allowing the passing of function without arguments to other functions; there are classes, though statements are allowed outside them, unlike Java. Python supports recursion and anonymous functions, though side effects can be implemented. Python is a strong, dynamically typed language. There are many built-in types, from numeric to iterator and mapping. Syntactically, it uses indentation to delimit blocks. Python uses reference counting to manage memory; if an object is dereferenced, its object count is set to 0 and its marked eligible for garbage collection. Python deals with exceptions using the try clause; it also allows users to raise an exception. Two unique features are its dynamic typing, enabling variable to be successively assignment to two different types, and mutability vs. immutability of its sequence types.
+
+\section{NodeJS}
+NodeJS is a Javascript framework that adds extensive server support to Javascript's intrinsic event-driven mechanics. Node takes advantage of Javascript's asynchronous programming style, introducing easy-to-use wrappers and functions that allow for non-blocking programming. Node allows Javscript applications to be written to listen for input before performing actions, a common feature present in event-driven programming, while using callback features that are common across all kinds of Javascript applications.
+
+\section{Javascript}
+Javascript is a prototype-based programming language that offers native asynchronous programming styles and methods. There are no classes, and inheritance is performed via a process of cloning existing objects that serve as prototypes. It is far more functional than Python, being built primarily on scheme. It is dynamic, weakly typed, and has first-class functions. There are six types of variable literals: Array, Boolean, Floating-point, Integers, Object, and String literals, far fewer than in python. Syntactically, Javascript is derived from C and most similar to Java. Javascript uses a garbage-collector, but requires prototype designers to manage their own memory. The problems of circular references don’t exist in Javascript, unlike Python, and it uses a mark and sweep algorithm. Uniquely, it has high levels of browser support and supports both client side and server side development.
+
+\section{Comparison of Twisted and Node}
+
+\begin{itemize}
+\item
+Both Twisted and NodeJS are centered around the event driven model. They have differing implementations with regards to how to write servers, clients and protocols, but can fully implement all these features. They all share the reactor model, for example. In terms of documentation, Node.js has the upperhand, with a very clear website with extensive information on all functions. These descriptions also include the implementation of each function. Twisted has a very good tutorial on how to write basic servers, clients and web clients and differed objects, but there are still other less documented functions are also present. In particular, it is hard to work through the levels of inheritance and find attributes causing bugs in the program.
+\item
+When it comes to writing protocols, Twisted is by the far the best of the three; it has an extensive list of protocol implementations, meaning that there will most likely be an API you can use to talk to some remote system (either client or server in most cases). Javascript uses objects and models each connection as heap allocation. HTTP is a first class protocol in Node. Node's HTTP library has grown out of the author's experiences developing and working with web servers.
+\item
+When trying to write servers, both Node and Twisted have similar ways of of doing so, usually by invoking a version of a run command. Twisted’s is a bit more involved, giving you the option of building your own protocol using a definition that you yourself have provided. 
+\item
+Writing simple client to these servers that are not tied to any specific functionality is easiest on Twisted, although Node does support it, it is more usually specially optimized for a specific task. As such, Node’s modules (more specifically the net module) provide asynchronous network wrappers. It contains methods for creating both servers and clients (called streams). 
+\item
+One of the main design differences is that Node's event model is a language construct instead of a library. Javascript is, at its core, an event-driven asynchronous language. In other frameworks/languages, there is always a blocking call to start the event-loop. Typically one defines behavior through callbacks at the beginning of a script and at the end starts a server through a blocking call. Node offers no such requirement. Rather, it simply enters the event loop after interpretting the input script. Node.js exits the event loop when there are no more callbacks to perform. As such, the event loop is hidden from the user.
+\item
+Node.js provides support for streaming data constantly, instead of just sending data between clients and servers. It provides superior HTTP parsing tools as well as other functions. Twisted uses a stream function and producers respectively, but doesn't have the same support for constant streaming of data.
+\item
+Both Twisted and Node offer automatic garbage collection through the inherited garbage collection features of Python and Javascript.
+\item 
+With regards to scalability, both Twisted and Node do reasonably well. However, Node is much more suited towards event-driven programming because of Javascript's intrinsically asynchronous core.
+\end{itemize}
+
+\section{Evaluation}
+
+For the chosen application, the best choice would be Node.js. Its extensive documentation is superior to Twisted's, and its functional style makes using protocols, servers and clients much easier.  One drawback is that Javascript has fewer built-in types Python, so replicating the functionality of tuples and lists would be difficult. That being said, Node's support for streaming data would be of vital use to this application. Node's asyncronous core provides natural event-driven patterns, unlike Twisted's addition to the blocking nature of Python.
+\\
+\\
+For the prototype that I implemented, I wrote bash scripts to instantiate the several server instances. These scripts specify the port to run the servers on. After instantiating and running the servers, we can peer connect the various servers together through telnet commands. After all this initial configuration, the server herd can receive client requests (to test this, we can also use telnet to send requests).
+
+\section{References}
+[1]http://programmers.stackexchange.com/questions/107950/differences-between-javascript-and-python \newline
+[2]http://nodejs.org/about/ \newline
+[3]https://developer.mozilla.org/en-US/docs/JavaScript \newline
+[4]http://stackoverflow.com/questions/5458631/whats-so-cool-about-twisted \newline
+
+\end{document}
